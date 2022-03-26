@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "SimpleChatApp.GrpcService";
+
+package SimpleChatApp;
+
+service ChatService 
+{
+	rpc RegisterNewUser (UserData) returns (RegistrationAnswer) {}
+	rpc LogIn(AuthorizationData) returns (AuthorizationAnswer) {}
+	rpc Subscribe(Guid) returns (stream Messages) {}
+	rpc Unsubscribe(Guid) returns (ActionStatusMessage) {}
+	rpc Write(OutgoingMessage) returns (ActionStatusMessage) {}
+	rpc GetLogs(TimeIntervalRequest) returns (Messages) {}
+}
+
+enum ActionStatus
+{
+	Allowed = 0;
+	Forbidden = 1;
+	WrongSid = 2;
+	ServerError = 3;
+}
+
+enum RegistrationStatus 
+{
+	RegistrationSuccessfull = 0;
+	LoginAlreadyExist = 1;
+	BadInput = 2;
+	RegistratioError = 3;
+}
+
+enum AuthorizationStatus 
+{
+	AuthorizationSuccessfull = 0;
+	WrongLoginOrPassword = 1;
+	AnotherConnectionActive = 2;
+	AuthorizationError = 3;
+}
+
+message Guid 
+{
+	string guid = 1;
+}
+
+message RegistrationAnswer
+{
+	RegistrationStatus status = 1;
+}
+
+message UserData
+{
+	string login = 1;
+	string passwordHash = 2;
+}
+
+message  AuthorizationData 
+{
+	UserData userData = 1;
+	bool clearActiveConnection = 2;
+}
+
+message AuthorizationAnswer
+{
+	Guid sid = 1;
+	AuthorizationStatus status = 2;
+}
+
+message MessageData
+{
+	Guid messageId = 1;
+	int64 playerId = 2;
+	string playerLogin = 3;
+	string text = 4;
+	google.protobuf.Timestamp timestamp = 5;
+}
+
+message OutgoingMessage 
+{
+	Guid sid = 1;
+	string text = 2;
+}
+
+message ActionStatusMessage{
+	ActionStatus actionStatus= 1;
+}
+
+message TimeIntervalRequest{
+	Guid sid = 1;
+	google.protobuf.Timestamp startTime = 2;
+	google.protobuf.Timestamp endTime = 3;
+}
+
+message Messages{
+	ActionStatus actionStatus= 1;
+	repeated MessageData logs = 2;
+}
