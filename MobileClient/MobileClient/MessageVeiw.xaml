@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ViewCell xmlns="http://xamarin.com/schemas/2014/forms"
+          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          x:Class="MobileClient.MessageVeiw">
+    <ViewCell.View>
+        <Frame CornerRadius="10" BackgroundColor="LightBlue" Margin="5">
+            <StackLayout Orientation="Vertical">
+                <Label x:Name="UsernameLabel" Text="Name" FontAttributes="Bold" TextColor="#FFDE46" FontSize="10" />
+                <Label x:Name="MessageTextLabel" Text="Text" FontSize="14" />
+                <Label x:Name="MessageTimeStampLabel"
+                       Text="Time" FontAttributes="Italic"
+                       TextColor="Gray"
+                       HorizontalTextAlignment="End"
+                       FontSize="8" />
+            </StackLayout>
+        </Frame>
+    </ViewCell.View>
+</ViewCell>

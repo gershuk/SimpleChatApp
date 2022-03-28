@@ -2,6 +2,10 @@
 {
     public interface IChatServerModel
     {
+        Task ClearAllConnections();
+
+        void Dispose();
+
         Task<(List<MessageData>? logs, ActionStatus status)> GetLogs(Guid sid, DateTime startTime, DateTime endTime);
 
         Task<AuthorizationAnswer> LogIn(string username, string passwordHash, string peerData, bool clearActiveConnection);

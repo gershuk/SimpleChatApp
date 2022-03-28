@@ -1,7 +1,9 @@
 ﻿namespace SimpleChatApp.Server;
 
-public sealed class ChatServerModel : IChatServerModel
+public sealed class ChatServerModel : IDisposable, IChatServerModel
 {
+    private bool _disposedValue;
+
     private const string _serverDataBaseConnectionString = "Data Source=server.db";
     private const string _playerConnectionsDataBaseConnectionString = "Data Source=:memory:";
 
@@ -19,13 +21,13 @@ public sealed class ChatServerModel : IChatServerModel
 
     private readonly Regex _badInputCheckRegex = new(@"[^\w1-9]+", RegexOptions.Compiled);
 
-    private ConcurrentDictionary<Guid, BufferBlock<MessageData>> _subscribers;
+    private readonly ConcurrentDictionary<Guid, BufferBlock<MessageData>> _subscribers;
 
     private async Task<AuthorizationAnswer> AuthorizeUser(int id, string peerData)
     {
         try
         {
-            var guid = Guid.NewGuid();
+            Guid guid = Guid.NewGuid();
             using SqliteCommand addConnection = new($@"INSERT INTO Connections VALUES(""{id}"", ""{guid}"", ""{peerData}"")",
                                                              _playerConnectionsDataBaseConnection);
             await addConnection.ExecuteNonQueryAsync();
@@ -99,11 +101,11 @@ public sealed class ChatServerModel : IChatServerModel
     {
         using SqliteCommand getConnections = new($@"SELECT UserId FROM Connections WHERE Sid = ""{sid}""",
                                                        _playerConnectionsDataBaseConnection);
-        using var sqlReader = await getConnections.ExecuteReaderAsync();
+        using SqliteDataReader? sqlReader = await getConnections.ExecuteReaderAsync();
         int? id = null;
         if (sqlReader.HasRows)
         {
-            var rows = sqlReader.ReadAsync();
+            Task<bool>? rows = sqlReader.ReadAsync();
             id = sqlReader.GetInt32(0);
         }
         return id;
@@ -157,10 +159,10 @@ public sealed class ChatServerModel : IChatServerModel
 
         AccountData? accountData = null;
 
-        using var sqlReader = await getLoginsCommand.ExecuteReaderAsync();
+        using SqliteDataReader? sqlReader = await getLoginsCommand.ExecuteReaderAsync();
         if (sqlReader.HasRows)
         {
-            var rows = sqlReader.ReadAsync();
+            Task<bool>? rows = sqlReader.ReadAsync();
             accountData = new(sqlReader.GetInt32(0), sqlReader.GetString(1), sqlReader.GetString(2));
         }
 
@@ -175,10 +177,10 @@ public sealed class ChatServerModel : IChatServerModel
 
         AccountData? accountData = null;
 
-        using var sqlReader = await getLoginsCommand.ExecuteReaderAsync();
+        using SqliteDataReader? sqlReader = await getLoginsCommand.ExecuteReaderAsync();
         if (sqlReader.HasRows)
         {
-            var rows = sqlReader.ReadAsync();
+            Task<bool>? rows = sqlReader.ReadAsync();
             accountData = new(sqlReader.GetInt32(0), sqlReader.GetString(1), sqlReader.GetString(2));
         }
 
@@ -190,10 +192,10 @@ public sealed class ChatServerModel : IChatServerModel
         using SqliteCommand getLoginsCommand = new($@"SELECT Id,Username,PasswordHash FROM Accounts WHERE Id = ""{id}""",
                                                    _serverDataBaseConnection);
         AccountData? accountData = null;
-        using var sqlReader = await getLoginsCommand.ExecuteReaderAsync();
+        using SqliteDataReader? sqlReader = await getLoginsCommand.ExecuteReaderAsync();
         if (sqlReader.HasRows)
         {
-            var rows = sqlReader.ReadAsync();
+            Task<bool>? rows = sqlReader.ReadAsync();
             accountData = new(sqlReader.GetInt32(0), sqlReader.GetString(1), sqlReader.GetString(2));
         }
         return accountData;
@@ -201,8 +203,8 @@ public sealed class ChatServerModel : IChatServerModel
 
     public async Task<AuthorizationAnswer> LogIn(string username, string passwordHash, string peerData, bool clearActiveConnection)
     {
-        var accountData = await GetAccountData(username, passwordHash);
-        var status = (accountData.HasValue, clearActiveConnection) switch
+        AccountData? accountData = await GetAccountData(username, passwordHash);
+        AuthorizationStatus status = (accountData.HasValue, clearActiveConnection) switch
         {
             (false, _) => AuthorizationStatus.WrongLoginOrPassword,
             (true, false) => await CanUserAuthorize(accountData!.Value.Id),
@@ -219,9 +221,9 @@ public sealed class ChatServerModel : IChatServerModel
         username = username.ToUpper();
         using SqliteCommand getLoginsCountCommand = new($@"SELECT COUNT(Username) FROM Accounts WHERE Username = ""{username}""",
                                                    _serverDataBaseConnection);
-        var loginsCount = (long?)await getLoginsCountCommand.ExecuteScalarAsync();
-        var isLoginCorrect = _badInputCheckRegex.Matches(username).Count > 0;
-        var status = (loginsCount, isLoginCorrect) switch
+        long? loginsCount = (long?)await getLoginsCountCommand.ExecuteScalarAsync();
+        bool isLoginCorrect = _badInputCheckRegex.Matches(username).Count > 0;
+        RegistrationStatus status = (loginsCount, isLoginCorrect) switch
         {
             ( > 0, _) => RegistrationStatus.LoginAlreadyExist,
             (0, false) => RegistrationStatus.RegistrationSuccessfull,
@@ -234,22 +236,26 @@ public sealed class ChatServerModel : IChatServerModel
                : status;
     }
 
-    public async Task<(BufferBlock<MessageData>? buffer, ActionStatus actionStatus)> Subscribe(Guid sid) =>
-        await IsUserConnectionExist(sid)
-        ? (_subscribers.GetOrAdd(sid, new BufferBlock<MessageData>()), ActionStatus.Allowed)
-        : (null, ActionStatus.WrongSid);
+    public async Task<(BufferBlock<MessageData>? buffer, ActionStatus actionStatus)> Subscribe(Guid sid)
+    {
+        return await IsUserConnectionExist(sid)
+? (_subscribers.GetOrAdd(sid, new BufferBlock<MessageData>()), ActionStatus.Allowed)
+: (null, ActionStatus.WrongSid);
+    }
 
     private void BroadCastMessage(MessageData messageData)
     {
-        foreach (var subscriber in _subscribers.Values)
+        foreach (BufferBlock<MessageData>? subscriber in _subscribers.Values)
+        {
             subscriber.SendAsync(messageData);
+        }
     }
 
     private async Task<ActionStatus> AddMessageToBase(MessageData messageData)
     {
         try
         {
-            using SqliteCommand addAccount = new($@"INSERT INTO Messages VALUES(""{messageData.Id}"",""{messageData.userId}"",
+            using SqliteCommand addAccount = new($@"INSERT INTO Messages VALUES(""{messageData.Id}"",""{messageData.UserId}"",
 ""{messageData.Text}"", ""{messageData.Time}"")", _serverDataBaseConnection);
             await addAccount.ExecuteNonQueryAsync();
             return ActionStatus.Allowed;
@@ -265,22 +271,30 @@ public sealed class ChatServerModel : IChatServerModel
     {
         try
         {
-            var isConnectionExist = await IsUserConnectionExist(sid);
+            bool isConnectionExist = await IsUserConnectionExist(sid);
             if (!isConnectionExist)
+            {
                 return ActionStatus.WrongSid;
+            }
 
-            var id = await GetIdForSid(sid);
+            int? id = await GetIdForSid(sid);
             if (!id.HasValue)
+            {
                 return ActionStatus.WrongSid;
+            }
 
-            var accauntData = await GetAccountData(id.Value);
+            AccountData? accauntData = await GetAccountData(id.Value);
             if (!accauntData.HasValue)
+            {
                 return ActionStatus.ServerError;
+            }
 
             MessageData messageData = new(Guid.NewGuid(), id.Value, accauntData.Value.Username, text, DateTime.Now);
-            var status = await AddMessageToBase(messageData);
+            ActionStatus status = await AddMessageToBase(messageData);
             if (status != ActionStatus.Allowed)
+            {
                 return ActionStatus.ServerError;
+            }
 
             BroadCastMessage(messageData);
 
@@ -295,7 +309,7 @@ public sealed class ChatServerModel : IChatServerModel
 
     public async Task<ActionStatus> TryUnsubscribe(Guid sid)
     {
-        var founded = _subscribers.Remove(sid, out var bufferBlock);
+        bool founded = _subscribers.Remove(sid, out BufferBlock<MessageData>? bufferBlock);
         bufferBlock?.Complete();
         await ClearUserConnection(sid);
         return founded ? ActionStatus.Allowed : ActionStatus.WrongSid;
@@ -310,21 +324,56 @@ public sealed class ChatServerModel : IChatServerModel
 
         List<MessageData> logs = new();
         using SqliteCommand getLoginsCommand = new($@"SELECT Messages.Id,UserId,Username,""Text"",Timestamp
-FROM Messages JOIN Accounts
+FROM Messages Inner JOIN Accounts on Messages.UserId = Accounts.Id
 WHERE Timestamp BETWEEN ""{startTime}"" AND ""{endTime}""
 ORDER BY Timestamp",
 _serverDataBaseConnection);
 
-        using var sqlReader = await getLoginsCommand.ExecuteReaderAsync();
+        using SqliteDataReader? sqlReader = await getLoginsCommand.ExecuteReaderAsync();
         if (sqlReader.HasRows)
         {
             while (await sqlReader.ReadAsync())
+            {
                 logs.Add(new(sqlReader.GetGuid(0),
                               sqlReader.GetInt32(1),
                               sqlReader.GetString(2),
                               sqlReader.GetString(3),
                               sqlReader.GetDateTime(4)));
+            }
         }
         return (logs, ActionStatus.Allowed);
     }
+
+    public async Task ClearAllConnections()
+    {
+        using SqliteCommand clearConnections = new($@"DELETE FROM Connections", _playerConnectionsDataBaseConnection);
+        await clearConnections.ExecuteNonQueryAsync();
+
+        foreach (var subscriber in _subscribers.Values)
+            subscriber.Complete();
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                ClearAllConnections().Wait();
+                using SqliteCommand clearConnections = new($@"DROP TABLE Connections", _playerConnectionsDataBaseConnection);
+                clearConnections.ExecuteNonQuery();
+                _playerConnectionsDataBaseConnection.Dispose();
+                _serverDataBaseConnection.Dispose();
+            }
+            _disposedValue = true;
+        }
+    }
+
+    ~ChatServerModel() => Dispose(false);
 }

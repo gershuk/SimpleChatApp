@@ -1,0 +1,33 @@
+﻿<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MobileClient"
+             x:Class="MobileClient.ChatPage">
+    <StackLayout BackgroundColor="#91DFFF">
+        <Frame Style="{StaticResource framStyle}">
+            <Label Text="Chat" HorizontalTextAlignment="Center" TextColor="White" FontSize="36" />
+        </Frame>
+        <ListView Margin="6"
+                  SelectionMode="None"
+                  x:Name="MessagesList"
+                  HasUnevenRows="True"
+                  ItemsSource="{Binding Messages}"
+                  VerticalScrollBarVisibility="Never">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <local:MessageVeiw Username="{Binding UserLogin}" Text="{Binding Text}" TimeStamp="{Binding Time}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <StackLayout BackgroundColor="#2196F3" Padding="8" Margin="1" Orientation="Horizontal">
+            <Editor x:Name="MessageTextEditor"
+                   Style="{StaticResource entryStyle}"
+                   Placeholder = "Text"
+                   HeightRequest="70"
+                   IsSpellCheckEnabled="True"
+                   HorizontalOptions="FillAndExpand"
+                   AutoSize="TextChanges"
+                   IsTextPredictionEnabled="True" />
+            <Button Style="{StaticResource buttonStyle}" Text="Send" MinimumWidthRequest="100" Clicked="SendButtonClicked" />
+        </StackLayout>
+    </StackLayout>
+</ContentPage>

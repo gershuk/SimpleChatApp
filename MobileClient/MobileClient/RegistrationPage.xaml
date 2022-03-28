@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MobileClient"
+             x:Class="MobileClient.RegistrationPage">
+    <StackLayout BackgroundColor="#91DFFF">
+        <Frame Style="{StaticResource framStyle}">
+            <Label Text="Register to chat server" HorizontalTextAlignment="Center" TextColor="White" FontSize="36" />
+        </Frame>
+        <StackLayout BackgroundColor="#F0FDFD" Padding="50">
+            <Entry x:Name="LoginEntry" Style="{StaticResource entryStyle}" Placeholder = "Login" Text="{Binding Path=Login}" />
+            <Entry x:Name="PasswordEntry" Style="{StaticResource entryStyle}" Placeholder = "Password" IsPassword ="True" Text="{Binding Path=Password}" />
+            <Entry x:Name="ServerIpEntry" Style="{StaticResource entryStyle}" Placeholder = "ServerIp" Text="{Binding Path=Ip}">
+                <Entry.Behaviors>
+                    <local:IpValidationBehavior />
+                </Entry.Behaviors>
+            </Entry>
+            <Entry x:Name="ServerPortEntry" Style="{StaticResource entryStyle}" Placeholder = "ServerPort" Text="{Binding Path=Port}">
+                <Entry.Behaviors>
+                    <local:NumericValidationBehavior />
+                </Entry.Behaviors>
+            </Entry>
+        </StackLayout>
+        <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Padding="10">
+            <Button Style="{StaticResource buttonStyle}" Text="Register" WidthRequest="180" Clicked="RegisterButtonClicked" />
+        </StackLayout>
+    </StackLayout>
+</ContentPage>
