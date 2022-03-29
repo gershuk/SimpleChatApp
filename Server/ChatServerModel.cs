@@ -56,37 +56,41 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
         }
     }
 
-    private async Task<AuthorizationStatus> ClearUserConnection(int id)
+    public async Task<ActionStatus> CloseUserConnection(int id)
     {
         try
         {
+            var sid = await GetSidForId(id);
+            if (sid.HasValue)
+                TryUnsubscribe(sid.Value);
             using SqliteCommand deleteConnections = new($@"DELETE FROM Connections WHERE UserId = ""{id}""",
                                                              _playerConnectionsDataBaseConnection);
             await deleteConnections.ExecuteNonQueryAsync();
 
-            return AuthorizationStatus.AuthorizationSuccessfull;
+            return ActionStatus.Allowed;
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            return AuthorizationStatus.ServerError;
+            return ActionStatus.ServerError;
         }
     }
 
-    private async Task<AuthorizationStatus> ClearUserConnection(Guid sid)
+    public async Task<ActionStatus> CloseUserConnection(Guid sid)
     {
         try
         {
+            TryUnsubscribe(sid);
             using SqliteCommand deleteConnections = new($@"DELETE FROM Connections WHERE Sid = ""{sid}""",
                                                              _playerConnectionsDataBaseConnection);
             await deleteConnections.ExecuteNonQueryAsync();
 
-            return AuthorizationStatus.AuthorizationSuccessfull;
+            return ActionStatus.Allowed;
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            return AuthorizationStatus.ServerError;
+            return ActionStatus.ServerError;
         }
     }
 
@@ -109,6 +113,20 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
             id = sqlReader.GetInt32(0);
         }
         return id;
+    }
+
+    private async Task<Guid?> GetSidForId(int id)
+    {
+        using SqliteCommand getConnections = new($@"SELECT Sid FROM Connections WHERE UserId = {id}",
+                                                       _playerConnectionsDataBaseConnection);
+        using SqliteDataReader? sqlReader = await getConnections.ExecuteReaderAsync();
+        Guid? guid = null;
+        if (sqlReader.HasRows)
+        {
+            Task<bool>? rows = sqlReader.ReadAsync();
+            guid = sqlReader.GetGuid(0);
+        }
+        return guid;
     }
 
     private async Task<bool> IsUserConnectionExist(Guid sid)
@@ -208,7 +226,10 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
         {
             (false, _) => AuthorizationStatus.WrongLoginOrPassword,
             (true, false) => await CanUserAuthorize(accountData!.Value.Id),
-            (true, true) => await ClearUserConnection(accountData!.Value.Id),
+            (true, true) => await CloseUserConnection(accountData!.Value.Id)
+                            is ActionStatus.Allowed
+                            ? AuthorizationStatus.AuthorizationSuccessfull
+                            : AuthorizationStatus.ServerError
         };
 
         return (status is AuthorizationStatus.AuthorizationSuccessfull)
@@ -307,11 +328,10 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
         }
     }
 
-    public async Task<ActionStatus> TryUnsubscribe(Guid sid)
+    private ActionStatus TryUnsubscribe(Guid sid)
     {
         bool founded = _subscribers.Remove(sid, out BufferBlock<MessageData>? bufferBlock);
         bufferBlock?.Complete();
-        await ClearUserConnection(sid);
         return founded ? ActionStatus.Allowed : ActionStatus.WrongSid;
     }
 
@@ -351,6 +371,7 @@ _serverDataBaseConnection);
 
         foreach (var subscriber in _subscribers.Values)
             subscriber.Complete();
+        _subscribers.Clear();
     }
 
     public void Dispose()
@@ -365,7 +386,7 @@ _serverDataBaseConnection);
         {
             if (disposing)
             {
-                ClearAllConnections().Wait();
+                ClearAllConnections().GetAwaiter().GetResult();
                 using SqliteCommand clearConnections = new($@"DROP TABLE Connections", _playerConnectionsDataBaseConnection);
                 clearConnections.ExecuteNonQuery();
                 _playerConnectionsDataBaseConnection.Dispose();

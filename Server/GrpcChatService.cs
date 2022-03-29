@@ -72,7 +72,7 @@ public class GrpcChatService : ChatService.ChatServiceBase
         }
         finally
         {
-            await _chatServerModel.TryUnsubscribe(new(request.Guid_));
+            await _chatServerModel.CloseUserConnection(new System.Guid(request.Guid_));
         }
     }
 
@@ -80,7 +80,10 @@ public class GrpcChatService : ChatService.ChatServiceBase
     {
         try
         {
-            return new() { ActionStatus = (await _chatServerModel.TryUnsubscribe(new(request.Guid_))).Convert() };
+            return new()
+            {
+                ActionStatus = (await _chatServerModel.CloseUserConnection(new System.Guid(request.Guid_))).Convert()
+            };
         }
         catch (Exception ex)
         {

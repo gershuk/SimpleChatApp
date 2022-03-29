@@ -4,6 +4,10 @@
     {
         Task ClearAllConnections();
 
+        Task<ActionStatus> CloseUserConnection(Guid sid);
+
+        Task<ActionStatus> CloseUserConnection(int id);
+
         void Dispose();
 
         Task<(List<MessageData>? logs, ActionStatus status)> GetLogs(Guid sid, DateTime startTime, DateTime endTime);
@@ -15,7 +19,5 @@
         Task<ActionStatus> SendMessage(Guid sid, string text);
 
         Task<(BufferBlock<MessageData>? buffer, ActionStatus actionStatus)> Subscribe(Guid sid);
-
-        Task<ActionStatus> TryUnsubscribe(Guid sid);
     }
 }
