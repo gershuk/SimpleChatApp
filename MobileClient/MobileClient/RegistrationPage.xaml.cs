@@ -112,14 +112,28 @@ namespace MobileClient
                     Login = Login,
                     PasswordHash = SHA256.GetStringHash(Password)
                 });
-                string alertText = (ans.Status) switch
+                string alertText;
+                switch (ans.Status)
                 {
-                    SimpleChatApp.GrpcService.RegistrationStatus.RegistrationSuccessfull => "Registration successfull!",
-                    SimpleChatApp.GrpcService.RegistrationStatus.LoginAlreadyExist => "Login already exist!",
-                    SimpleChatApp.GrpcService.RegistrationStatus.BadInput => "Bad login or password!",
-                    SimpleChatApp.GrpcService.RegistrationStatus.RegistratioError => "Server error!",
-                    _ => throw new NotImplementedException(),
-                };
+                    case SimpleChatApp.GrpcService.RegistrationStatus.RegistrationSuccessfull:
+                        alertText = "Registration successfull!";
+                        break;
+
+                    case SimpleChatApp.GrpcService.RegistrationStatus.LoginAlreadyExist:
+                        alertText = "Login already exist!";
+                        break;
+
+                    case SimpleChatApp.GrpcService.RegistrationStatus.BadInput:
+                        alertText = "Bad login or password!";
+                        break;
+
+                    case SimpleChatApp.GrpcService.RegistrationStatus.RegistratioError:
+                        alertText = "Server error!";
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
+                }
                 await DisplayAlert("Alert", alertText, "OK");
 
                 if (ans.Status is SimpleChatApp.GrpcService.RegistrationStatus.RegistrationSuccessfull)

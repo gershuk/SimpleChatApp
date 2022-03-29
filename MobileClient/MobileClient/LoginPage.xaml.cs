@@ -116,14 +116,28 @@ namespace MobileClient
                         PasswordHash = SHA256.GetStringHash(Password)
                     },
                 });
-                string alertText = ans.Status switch
+                string alertText;
+                switch (ans.Status)
                 {
-                    SimpleChatApp.GrpcService.AuthorizationStatus.AuthorizationSuccessfull => "Authorization successfull!",
-                    SimpleChatApp.GrpcService.AuthorizationStatus.WrongLoginOrPassword => "Wrong login or password!",
-                    SimpleChatApp.GrpcService.AuthorizationStatus.AnotherConnectionActive => "Another connection active!",
-                    SimpleChatApp.GrpcService.AuthorizationStatus.AuthorizationError => "Server error!",
-                    _ => throw new NotImplementedException(),
-                };
+                    case SimpleChatApp.GrpcService.AuthorizationStatus.AuthorizationSuccessfull:
+                        alertText = "Authorization successfull!";
+                        break;
+
+                    case SimpleChatApp.GrpcService.AuthorizationStatus.WrongLoginOrPassword:
+                        alertText = "Wrong login or password!";
+                        break;
+
+                    case SimpleChatApp.GrpcService.AuthorizationStatus.AnotherConnectionActive:
+                        alertText = "Another connection active!";
+                        break;
+
+                    case SimpleChatApp.GrpcService.AuthorizationStatus.AuthorizationError:
+                        alertText = "Server error!";
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
+                }
                 await DisplayAlert("Alert", alertText, "OK");
 
                 if (ans.Status is SimpleChatApp.GrpcService.AuthorizationStatus.AuthorizationSuccessfull)

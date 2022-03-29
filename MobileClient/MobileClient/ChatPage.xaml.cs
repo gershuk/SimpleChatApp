@@ -104,7 +104,7 @@ namespace MobileClient
 
         private void MessagesCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            MessagesList.ScrollTo(Messages[^1], ScrollToPosition.End, true);
+            MessagesList.ScrollTo(Messages[Messages.Count - 1], ScrollToPosition.End, true);
         }
 
         private async Task LoadLogs()
@@ -124,7 +124,8 @@ namespace MobileClient
                     await Task.Yield();
                 }
                 await Task.Yield();
-                MessagesList.ScrollTo(Messages[^1], ScrollToPosition.End, true);
+                if (Messages.Count > 0)
+                    MessagesList.ScrollTo(Messages[Messages.Count - 1], ScrollToPosition.End, true);
             }
             catch (RpcException ex)
             {
@@ -141,14 +142,25 @@ namespace MobileClient
                 stream = ChatServiceClient.Subscribe(new SimpleChatApp.GrpcService.Guid() { Guid_ = Sid }).ResponseStream;
                 while (await stream.MoveNext())
                 {
-                    Task displayTask = stream.Current.ActionStatus switch
+                    Task displayTask = Task.CompletedTask;
+                    switch (stream.Current.ActionStatus)
                     {
-                        SimpleChatApp.GrpcService.ActionStatus.Allowed => Task.CompletedTask,
-                        SimpleChatApp.GrpcService.ActionStatus.Forbidden => DisplayAlert("Alert", $"Forbidden action!", "Ok"),
-                        SimpleChatApp.GrpcService.ActionStatus.WrongSid => DisplayAlert("Alert", $"Wrong sid!", "Ok"),
-                        SimpleChatApp.GrpcService.ActionStatus.ServerError => DisplayAlert("Alert", $"Server error!", "Ok"),
-                        _ => throw new NotImplementedException(),
-                    };
+                        case SimpleChatApp.GrpcService.ActionStatus.Allowed:
+                            displayTask = Task.CompletedTask;
+                            break;
+
+                        case SimpleChatApp.GrpcService.ActionStatus.Forbidden:
+                            displayTask = DisplayAlert("Alert", $"Forbidden action!", "Ok");
+                            break;
+
+                        case SimpleChatApp.GrpcService.ActionStatus.WrongSid:
+                            displayTask = DisplayAlert("Alert", $"Wrong sid!", "Ok");
+                            break;
+
+                        case SimpleChatApp.GrpcService.ActionStatus.ServerError:
+                            displayTask = DisplayAlert("Alert", $"Server error!", "Ok");
+                            break;
+                    }
                     await displayTask;
                     if (stream.Current.ActionStatus == SimpleChatApp.GrpcService.ActionStatus.Allowed)
                     {
@@ -170,6 +182,10 @@ namespace MobileClient
                     || ex.Status.StatusCode == StatusCode.Cancelled
                     || ex.Status.StatusCode == StatusCode.Unavailable)
                     await Unsubcribe();
+            }
+            finally
+            {
+                await DisplayAlert("Alert", $"Server close connetction", "OK");
                 await Navigation.PopAsync();
             }
         }
@@ -204,14 +220,25 @@ namespace MobileClient
                     Text = text
                 });
 
-                Task task = ans.ActionStatus switch
+                Task task = Task.CompletedTask;
+                switch (ans.ActionStatus)
                 {
-                    SimpleChatApp.GrpcService.ActionStatus.Allowed => Task.CompletedTask,
-                    SimpleChatApp.GrpcService.ActionStatus.Forbidden => DisplayAlert("Alert", $"Forbidden action!", "Ok"),
-                    SimpleChatApp.GrpcService.ActionStatus.WrongSid => DisplayAlert("Alert", $"Wrong sid!", "Ok"),
-                    SimpleChatApp.GrpcService.ActionStatus.ServerError => DisplayAlert("Alert", $"Server error!", "Ok"),
-                    _ => throw new NotImplementedException(),
-                };
+                    case SimpleChatApp.GrpcService.ActionStatus.Allowed:
+                        task = Task.CompletedTask;
+                        break;
+
+                    case SimpleChatApp.GrpcService.ActionStatus.Forbidden:
+                        task = DisplayAlert("Alert", $"Forbidden action!", "Ok");
+                        break;
+
+                    case SimpleChatApp.GrpcService.ActionStatus.WrongSid:
+                        task = DisplayAlert("Alert", $"Wrong sid!", "Ok");
+                        break;
+
+                    case SimpleChatApp.GrpcService.ActionStatus.ServerError:
+                        task = DisplayAlert("Alert", $"Server error!", "Ok");
+                        break;
+                }
                 await task;
             }
             catch (RpcException ex)
@@ -224,7 +251,8 @@ namespace MobileClient
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            MessagesList.ScrollTo(Messages[^1], ScrollToPosition.End, true);
+            if (Messages.Count > 0)
+                MessagesList.ScrollTo(Messages[Messages.Count - 1], ScrollToPosition.End, true);
         }
     }
 }

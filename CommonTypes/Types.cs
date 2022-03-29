@@ -14,38 +14,65 @@ namespace SimpleChatApp.CommonTypes
     {
         public static GrpcService.RegistrationStatus Convert(this RegistrationStatus status)
         {
-            return status switch
+            switch (status)
             {
-                RegistrationStatus.RegistrationSuccessfull => GrpcService.RegistrationStatus.RegistrationSuccessfull,
-                RegistrationStatus.LoginAlreadyExist => GrpcService.RegistrationStatus.LoginAlreadyExist,
-                RegistrationStatus.BadInput => GrpcService.RegistrationStatus.BadInput,
-                RegistrationStatus.ServerError => GrpcService.RegistrationStatus.RegistratioError,
-                _ => throw new NotImplementedException(),
-            };
+                case RegistrationStatus.RegistrationSuccessfull:
+                    return GrpcService.RegistrationStatus.RegistrationSuccessfull;
+
+                case RegistrationStatus.LoginAlreadyExist:
+                    return GrpcService.RegistrationStatus.LoginAlreadyExist;
+
+                case RegistrationStatus.BadInput:
+                    return GrpcService.RegistrationStatus.BadInput;
+
+                case RegistrationStatus.ServerError:
+                    return GrpcService.RegistrationStatus.RegistratioError;
+
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         public static GrpcService.AuthorizationStatus Convert(this AuthorizationStatus status)
         {
-            return status switch
+            switch (status)
             {
-                AuthorizationStatus.AuthorizationSuccessfull => GrpcService.AuthorizationStatus.AuthorizationSuccessfull,
-                AuthorizationStatus.WrongLoginOrPassword => GrpcService.AuthorizationStatus.WrongLoginOrPassword,
-                AuthorizationStatus.AnotherConnectionActive => GrpcService.AuthorizationStatus.AnotherConnectionActive,
-                AuthorizationStatus.ServerError => GrpcService.AuthorizationStatus.AuthorizationError,
-                _ => throw new NotImplementedException(),
-            };
+                case AuthorizationStatus.AuthorizationSuccessfull:
+                    return GrpcService.AuthorizationStatus.AuthorizationSuccessfull;
+
+                case AuthorizationStatus.WrongLoginOrPassword:
+                    return GrpcService.AuthorizationStatus.WrongLoginOrPassword;
+
+                case AuthorizationStatus.AnotherConnectionActive:
+                    return GrpcService.AuthorizationStatus.AnotherConnectionActive;
+
+                case AuthorizationStatus.ServerError:
+                    return GrpcService.AuthorizationStatus.AuthorizationError;
+
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         public static GrpcService.ActionStatus Convert(this ActionStatus status)
         {
-            return status switch
+            switch (status)
             {
-                ActionStatus.Allowed => GrpcService.ActionStatus.Allowed,
-                ActionStatus.Forbidden => GrpcService.ActionStatus.Forbidden,
-                ActionStatus.WrongSid => GrpcService.ActionStatus.WrongSid,
-                ActionStatus.ServerError => GrpcService.ActionStatus.ServerError,
-                _ => throw new NotImplementedException(),
-            };
+                case ActionStatus.Allowed:
+                    return GrpcService.ActionStatus.Allowed;
+
+                case ActionStatus.Forbidden:
+                    return GrpcService.ActionStatus.Forbidden;
+
+                case ActionStatus.WrongSid:
+                    return GrpcService.ActionStatus.WrongSid;
+
+                case ActionStatus.ServerError:
+                    return GrpcService.ActionStatus.ServerError;
+
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         public static GrpcService.MessageData Convert(this MessageData message)

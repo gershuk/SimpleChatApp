@@ -14,8 +14,10 @@ namespace SimpleChatApp.CommonTypes
 
         public static string GetStringHash(string password)
         {
-            using Stream? stream = GenerateStreamFromString(password);
-            return Encoding.Unicode.GetString(_mySHA256.ComputeHash(stream));
+            using (var stream = GenerateStreamFromString(password))
+            {
+                return Encoding.Unicode.GetString(_mySHA256.ComputeHash(stream));
+            }
         }
     }
 }
