@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Description>SimpleChatApp gRpc service description</Description>
+    <RepositoryUrl>https://github.com/gershuk/SimpleChatApp</RepositoryUrl>
+    <PackageId>SimpleChatApp.GrpcConfig</PackageId>
   </PropertyGroup>
 
   <ItemGroup>

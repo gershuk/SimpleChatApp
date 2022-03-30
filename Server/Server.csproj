@@ -5,6 +5,10 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Description>SimpleChatApp server</Description>
+    <RepositoryUrl>https://github.com/gershuk/SimpleChatApp</RepositoryUrl>
+    <PackageId>SimpleChatApp.Server</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
