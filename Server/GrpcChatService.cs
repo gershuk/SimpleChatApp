@@ -8,22 +8,19 @@ public class GrpcChatService : ChatService.ChatServiceBase
 {
     private readonly IChatServerModel _chatServerModel;
 
-    public GrpcChatService(IChatServerModel chatServerModel)
-    {
-        _chatServerModel = chatServerModel;
-    }
+    public GrpcChatService(IChatServerModel chatServerModel) => _chatServerModel = chatServerModel;
 
     public override async Task<Messages> GetLogs(TimeIntervalRequest request, ServerCallContext context)
     {
         try
         {
-            (List<CommonTypes.MessageData>? logs, CommonTypes.ActionStatus status) = await _chatServerModel.GetLogs(new(request.Sid.Guid_.ToString()),
+            (var logs, var status) = await _chatServerModel.GetLogs(new(request.Sid.Guid_.ToString()),
                                                                     request.StartTime.ToDateTime(),
                                                                     request.EndTime.ToDateTime());
-            Messages? messages = new Messages() { ActionStatus = status.Convert() };
+            var messages = new Messages() { ActionStatus = status.Convert() };
             if (logs != null)
             {
-                foreach (CommonTypes.MessageData message in logs)
+                foreach (var message in logs)
                 {
                     messages.Logs.Add(message.Convert());
                 }
@@ -37,28 +34,22 @@ public class GrpcChatService : ChatService.ChatServiceBase
         }
     }
 
-    public override async Task<GrpcService.AuthorizationAnswer> LogIn(AuthorizationData request, ServerCallContext context)
-    {
-        return (await _chatServerModel.LogIn(request.UserData.Login, request.UserData.PasswordHash, context.Peer, request.ClearActiveConnection)).Convert();
-    }
+    public override async Task<GrpcService.AuthorizationAnswer> LogIn(AuthorizationData request, ServerCallContext context) => (await _chatServerModel.LogIn(request.UserData.Login, request.UserData.PasswordHash, context.Peer, request.ClearActiveConnection)).Convert();
 
-    public override async Task<RegistrationAnswer> RegisterNewUser(UserData request, ServerCallContext context)
-    {
-        return new() { Status = (await _chatServerModel.RegisterNewUser(request.Login, request.PasswordHash)).Convert() };
-    }
+    public override async Task<RegistrationAnswer> RegisterNewUser(UserData request, ServerCallContext context) => new() { Status = (await _chatServerModel.RegisterNewUser(request.Login, request.PasswordHash)).Convert() };
 
     public override async Task Subscribe(GrpcService.Guid request, IServerStreamWriter<Messages> responseStream, ServerCallContext context)
     {
         try
         {
-            (BufferBlock<CommonTypes.MessageData>? buffer, CommonTypes.ActionStatus status) = await _chatServerModel.Subscribe(new(request.Guid_));
+            (var buffer, var status) = await _chatServerModel.Subscribe(new(request.Guid_));
             if (status != CommonTypes.ActionStatus.Allowed)
             {
                 await responseStream.WriteAsync(new() { ActionStatus = status.Convert() });
                 return;
             }
 
-            await foreach (CommonTypes.MessageData message in buffer!.ReceiveAllAsync(context.CancellationToken))
+            await foreach (var message in buffer!.ReceiveAllAsync(context.CancellationToken))
             {
                 Messages messages = new() { ActionStatus = GrpcService.ActionStatus.Allowed };
                 messages.Logs.Add(message.Convert());
@@ -92,13 +83,10 @@ public class GrpcChatService : ChatService.ChatServiceBase
         }
     }
 
-    public override async Task<ActionStatusMessage> Write(OutgoingMessage request, ServerCallContext context)
+    public override async Task<ActionStatusMessage> Write(OutgoingMessage request, ServerCallContext context) => new()
     {
-        return new()
-        {
-            ActionStatus = (await _chatServerModel.SendMessage(new(request.Sid.Guid_), request.Text)).Convert()
-        };
-    }
+        ActionStatus = (await _chatServerModel.SendMessage(new(request.Sid.Guid_), request.Text)).Convert()
+    };
 
     public async void CloseAllConnections() => await _chatServerModel.ClearAllConnections();
 }

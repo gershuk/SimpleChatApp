@@ -17,19 +17,19 @@ namespace SimpleChatApp.CommonTypes
             switch (status)
             {
                 case RegistrationStatus.RegistrationSuccessfull:
-                    return GrpcService.RegistrationStatus.RegistrationSuccessfull;
+                return GrpcService.RegistrationStatus.RegistrationSuccessfull;
 
                 case RegistrationStatus.LoginAlreadyExist:
-                    return GrpcService.RegistrationStatus.LoginAlreadyExist;
+                return GrpcService.RegistrationStatus.LoginAlreadyExist;
 
                 case RegistrationStatus.BadInput:
-                    return GrpcService.RegistrationStatus.BadInput;
+                return GrpcService.RegistrationStatus.BadInput;
 
                 case RegistrationStatus.ServerError:
-                    return GrpcService.RegistrationStatus.RegistratioError;
+                return GrpcService.RegistrationStatus.RegistratioError;
 
                 default:
-                    throw new NotImplementedException();
+                throw new NotImplementedException();
             }
         }
 
@@ -38,19 +38,19 @@ namespace SimpleChatApp.CommonTypes
             switch (status)
             {
                 case AuthorizationStatus.AuthorizationSuccessfull:
-                    return GrpcService.AuthorizationStatus.AuthorizationSuccessfull;
+                return GrpcService.AuthorizationStatus.AuthorizationSuccessfull;
 
                 case AuthorizationStatus.WrongLoginOrPassword:
-                    return GrpcService.AuthorizationStatus.WrongLoginOrPassword;
+                return GrpcService.AuthorizationStatus.WrongLoginOrPassword;
 
                 case AuthorizationStatus.AnotherConnectionActive:
-                    return GrpcService.AuthorizationStatus.AnotherConnectionActive;
+                return GrpcService.AuthorizationStatus.AnotherConnectionActive;
 
                 case AuthorizationStatus.ServerError:
-                    return GrpcService.AuthorizationStatus.AuthorizationError;
+                return GrpcService.AuthorizationStatus.AuthorizationError;
 
                 default:
-                    throw new NotImplementedException();
+                throw new NotImplementedException();
             }
         }
 
@@ -59,54 +59,45 @@ namespace SimpleChatApp.CommonTypes
             switch (status)
             {
                 case ActionStatus.Allowed:
-                    return GrpcService.ActionStatus.Allowed;
+                return GrpcService.ActionStatus.Allowed;
 
                 case ActionStatus.Forbidden:
-                    return GrpcService.ActionStatus.Forbidden;
+                return GrpcService.ActionStatus.Forbidden;
 
                 case ActionStatus.WrongSid:
-                    return GrpcService.ActionStatus.WrongSid;
+                return GrpcService.ActionStatus.WrongSid;
 
                 case ActionStatus.ServerError:
-                    return GrpcService.ActionStatus.ServerError;
+                return GrpcService.ActionStatus.ServerError;
 
                 default:
-                    throw new NotImplementedException();
+                throw new NotImplementedException();
             }
         }
 
-        public static GrpcService.MessageData Convert(this MessageData message)
+        public static GrpcService.MessageData Convert(this MessageData message) => new GrpcService.MessageData()
         {
-            return new GrpcService.MessageData()
-            {
-                MessageId = new GrpcService.Guid() { Guid_ = message.Id.ToString() },
-                PlayerId = message.UserId,
-                PlayerLogin = message.UserLogin,
-                Text = message.Text,
-                Timestamp = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTime(message.Time.ToUniversalTime()),
-            };
-        }
+            MessageId = new GrpcService.Guid() { Guid_ = message.Id.ToString() },
+            PlayerId = message.UserId,
+            PlayerLogin = message.UserLogin,
+            Text = message.Text,
+            Timestamp = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTime(message.Time.ToUniversalTime()),
+        };
 
-        public static MessageData Convert(this GrpcService.MessageData message)
+        public static MessageData Convert(this GrpcService.MessageData message) => new MessageData()
         {
-            return new MessageData()
-            {
-                Id = new Guid(message.MessageId.Guid_),
-                Text = message.Text,
-                Time = message.Timestamp.ToDateTime(),
-                UserId = (int)message.PlayerId,
-                UserLogin = message.PlayerLogin,
-            };
-        }
+            Id = new Guid(message.MessageId.Guid_),
+            Text = message.Text,
+            Time = message.Timestamp.ToDateTime(),
+            UserId = (int)message.PlayerId,
+            UserLogin = message.PlayerLogin,
+        };
 
-        public static GrpcService.AuthorizationAnswer Convert(this AuthorizationAnswer answer)
+        public static GrpcService.AuthorizationAnswer Convert(this AuthorizationAnswer answer) => new GrpcService.AuthorizationAnswer()
         {
-            return new GrpcService.AuthorizationAnswer()
-            {
-                Sid = new GrpcService.Guid() { Guid_ = answer.Sid.ToString() },
-                Status = answer.AuthorizationStatus.Convert(),
-            };
-        }
+            Sid = new GrpcService.Guid() { Guid_ = answer.Sid.ToString() },
+            Status = answer.AuthorizationStatus.Convert(),
+        };
     }
 
     public enum AuthorizationStatus

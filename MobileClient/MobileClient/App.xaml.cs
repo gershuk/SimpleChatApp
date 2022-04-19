@@ -51,13 +51,13 @@ namespace MobileClient
                 return;
             }
 
-            bool isValid = args
+            var isValid = args
                 .NewTextValue
                 .ToCharArray()
                 .All(char.IsDigit)
                 || (args.NewTextValue.Length > 1 && args.NewTextValue.StartsWith("-"));
 
-            string current = args.NewTextValue;
+            var current = args.NewTextValue;
             current = current.TrimStart('0');
 
             if (current.Length == 0)
@@ -87,8 +87,8 @@ namespace MobileClient
 
         private static void OnEntryTextChanged(object sender, TextChangedEventArgs args)
         {
-            Entry entery = (Entry)sender;
-            string text = args.NewTextValue;
+            var entery = (Entry)sender;
+            var text = args.NewTextValue;
             if (text.Where(c => c is '.').Count() > 3)
             {
                 text = args.OldTextValue;

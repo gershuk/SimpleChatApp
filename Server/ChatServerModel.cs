@@ -27,7 +27,7 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
     {
         try
         {
-            Guid guid = Guid.NewGuid();
+            var guid = Guid.NewGuid();
             using SqliteCommand addConnection = new($@"INSERT INTO Connections VALUES(""{id}"", ""{guid}"", ""{peerData}"")",
                                                              _playerConnectionsDataBaseConnection);
             await addConnection.ExecuteNonQueryAsync();
@@ -105,11 +105,11 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
     {
         using SqliteCommand getConnections = new($@"SELECT UserId FROM Connections WHERE Sid = ""{sid}""",
                                                        _playerConnectionsDataBaseConnection);
-        using SqliteDataReader? sqlReader = await getConnections.ExecuteReaderAsync();
+        using var sqlReader = await getConnections.ExecuteReaderAsync();
         int? id = null;
         if (sqlReader.HasRows)
         {
-            Task<bool>? rows = sqlReader.ReadAsync();
+            var rows = sqlReader.ReadAsync();
             id = sqlReader.GetInt32(0);
         }
         return id;
@@ -119,11 +119,11 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
     {
         using SqliteCommand getConnections = new($@"SELECT Sid FROM Connections WHERE UserId = {id}",
                                                        _playerConnectionsDataBaseConnection);
-        using SqliteDataReader? sqlReader = await getConnections.ExecuteReaderAsync();
+        using var sqlReader = await getConnections.ExecuteReaderAsync();
         Guid? guid = null;
         if (sqlReader.HasRows)
         {
-            Task<bool>? rows = sqlReader.ReadAsync();
+            var rows = sqlReader.ReadAsync();
             guid = sqlReader.GetGuid(0);
         }
         return guid;
@@ -177,10 +177,10 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
 
         AccountData? accountData = null;
 
-        using SqliteDataReader? sqlReader = await getLoginsCommand.ExecuteReaderAsync();
+        using var sqlReader = await getLoginsCommand.ExecuteReaderAsync();
         if (sqlReader.HasRows)
         {
-            Task<bool>? rows = sqlReader.ReadAsync();
+            var rows = sqlReader.ReadAsync();
             accountData = new(sqlReader.GetInt32(0), sqlReader.GetString(1), sqlReader.GetString(2));
         }
 
@@ -195,10 +195,10 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
 
         AccountData? accountData = null;
 
-        using SqliteDataReader? sqlReader = await getLoginsCommand.ExecuteReaderAsync();
+        using var sqlReader = await getLoginsCommand.ExecuteReaderAsync();
         if (sqlReader.HasRows)
         {
-            Task<bool>? rows = sqlReader.ReadAsync();
+            var rows = sqlReader.ReadAsync();
             accountData = new(sqlReader.GetInt32(0), sqlReader.GetString(1), sqlReader.GetString(2));
         }
 
@@ -210,10 +210,10 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
         using SqliteCommand getLoginsCommand = new($@"SELECT Id,Username,PasswordHash FROM Accounts WHERE Id = ""{id}""",
                                                    _serverDataBaseConnection);
         AccountData? accountData = null;
-        using SqliteDataReader? sqlReader = await getLoginsCommand.ExecuteReaderAsync();
+        using var sqlReader = await getLoginsCommand.ExecuteReaderAsync();
         if (sqlReader.HasRows)
         {
-            Task<bool>? rows = sqlReader.ReadAsync();
+            var rows = sqlReader.ReadAsync();
             accountData = new(sqlReader.GetInt32(0), sqlReader.GetString(1), sqlReader.GetString(2));
         }
         return accountData;
@@ -221,8 +221,8 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
 
     public async Task<AuthorizationAnswer> LogIn(string username, string passwordHash, string peerData, bool clearActiveConnection)
     {
-        AccountData? accountData = await GetAccountData(username, passwordHash);
-        AuthorizationStatus status = (accountData.HasValue, clearActiveConnection) switch
+        var accountData = await GetAccountData(username, passwordHash);
+        var status = (accountData.HasValue, clearActiveConnection) switch
         {
             (false, _) => AuthorizationStatus.WrongLoginOrPassword,
             (true, false) => await CanUserAuthorize(accountData!.Value.Id),
@@ -242,9 +242,9 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
         username = username.ToUpper();
         using SqliteCommand getLoginsCountCommand = new($@"SELECT COUNT(Username) FROM Accounts WHERE Username = ""{username}""",
                                                    _serverDataBaseConnection);
-        long? loginsCount = (long?)await getLoginsCountCommand.ExecuteScalarAsync();
-        bool isLoginCorrect = _badInputCheckRegex.Matches(username).Count > 0;
-        RegistrationStatus status = (loginsCount, isLoginCorrect) switch
+        var loginsCount = (long?)await getLoginsCountCommand.ExecuteScalarAsync();
+        var isLoginCorrect = _badInputCheckRegex.Matches(username).Count > 0;
+        var status = (loginsCount, isLoginCorrect) switch
         {
             ( > 0, _) => RegistrationStatus.LoginAlreadyExist,
             (0, false) => RegistrationStatus.RegistrationSuccessfull,
@@ -257,16 +257,13 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
                : status;
     }
 
-    public async Task<(BufferBlock<MessageData>? buffer, ActionStatus actionStatus)> Subscribe(Guid sid)
-    {
-        return await IsUserConnectionExist(sid)
+    public async Task<(BufferBlock<MessageData>? buffer, ActionStatus actionStatus)> Subscribe(Guid sid) => await IsUserConnectionExist(sid)
 ? (_subscribers.GetOrAdd(sid, new BufferBlock<MessageData>()), ActionStatus.Allowed)
 : (null, ActionStatus.WrongSid);
-    }
 
     private void BroadCastMessage(MessageData messageData)
     {
-        foreach (BufferBlock<MessageData>? subscriber in _subscribers.Values)
+        foreach (var subscriber in _subscribers.Values)
         {
             subscriber.SendAsync(messageData);
         }
@@ -292,26 +289,26 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
     {
         try
         {
-            bool isConnectionExist = await IsUserConnectionExist(sid);
+            var isConnectionExist = await IsUserConnectionExist(sid);
             if (!isConnectionExist)
             {
                 return ActionStatus.WrongSid;
             }
 
-            int? id = await GetIdForSid(sid);
+            var id = await GetIdForSid(sid);
             if (!id.HasValue)
             {
                 return ActionStatus.WrongSid;
             }
 
-            AccountData? accauntData = await GetAccountData(id.Value);
+            var accauntData = await GetAccountData(id.Value);
             if (!accauntData.HasValue)
             {
                 return ActionStatus.ServerError;
             }
 
             MessageData messageData = new(Guid.NewGuid(), id.Value, accauntData.Value.Username, text, DateTime.Now);
-            ActionStatus status = await AddMessageToBase(messageData);
+            var status = await AddMessageToBase(messageData);
             if (status != ActionStatus.Allowed)
             {
                 return ActionStatus.ServerError;
@@ -330,7 +327,7 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
 
     private ActionStatus TryUnsubscribe(Guid sid)
     {
-        bool founded = _subscribers.Remove(sid, out BufferBlock<MessageData>? bufferBlock);
+        var founded = _subscribers.Remove(sid, out var bufferBlock);
         bufferBlock?.Complete();
         return founded ? ActionStatus.Allowed : ActionStatus.WrongSid;
     }
@@ -349,7 +346,7 @@ WHERE Timestamp BETWEEN ""{startTime}"" AND ""{endTime}""
 ORDER BY Timestamp",
 _serverDataBaseConnection);
 
-        using SqliteDataReader? sqlReader = await getLoginsCommand.ExecuteReaderAsync();
+        using var sqlReader = await getLoginsCommand.ExecuteReaderAsync();
         if (sqlReader.HasRows)
         {
             while (await sqlReader.ReadAsync())

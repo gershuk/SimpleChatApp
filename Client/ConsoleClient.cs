@@ -27,7 +27,7 @@ public static class ConsoleClient
         var isRegister = Console.ReadLine();
         if (isRegister?.ToUpper() is "Y")
         {
-            GrpcService.RegistrationAnswer? regAns = await chatServiceClient.RegisterNewUserAsync(new()
+            var regAns = await chatServiceClient.RegisterNewUserAsync(new()
             {
                 Login = login,
                 PasswordHash = password
@@ -55,7 +55,7 @@ public static class ConsoleClient
 
             if (logs.ActionStatus is GrpcService.ActionStatus.Allowed)
             {
-                foreach (GrpcService.MessageData message in logs.Logs)
+                foreach (var message in logs.Logs)
                 {
                     WriteMessage(message);
                 }
@@ -75,7 +75,7 @@ public static class ConsoleClient
                 }
                 else
                 {
-                    GrpcService.ActionStatusMessage? wrAns = await chatServiceClient.WriteAsync(new() { Sid = loginAns.Sid, Text = text });
+                    var wrAns = await chatServiceClient.WriteAsync(new() { Sid = loginAns.Sid, Text = text });
                 }
             }
 

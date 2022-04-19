@@ -65,8 +65,8 @@ namespace MobileClient
         public LoginPage()
         {
             InitializeComponent();
-            Entry[] entryes = new[] { LoginEntry, PasswordEntry, ServerIpEntry, ServerPortEntry };
-            foreach (Entry entry in entryes)
+            var entryes = new[] { LoginEntry, PasswordEntry, ServerIpEntry, ServerPortEntry };
+            foreach (var entry in entryes)
             {
                 entry.BindingContext = this;
             }
@@ -90,8 +90,8 @@ namespace MobileClient
 
         private async void LoginButtonClicked(object sender, EventArgs e)
         {
-            Entry[] entries = new[] { LoginEntry, PasswordEntry, ServerIpEntry, ServerPortEntry };
-            foreach (Entry entry in entries)
+            var entries = new[] { LoginEntry, PasswordEntry, ServerIpEntry, ServerPortEntry };
+            foreach (var entry in entries)
             {
                 if (string.IsNullOrEmpty(entry.Text))
                 {
@@ -107,7 +107,7 @@ namespace MobileClient
             try
             {
                 ChatServiceClient = new ChatServiceClient(new Channel($"{Ip}:{Port}", ChannelCredentials.Insecure));
-                SimpleChatApp.GrpcService.AuthorizationAnswer ans = await ChatServiceClient.LogInAsync(new SimpleChatApp.GrpcService.AuthorizationData()
+                var ans = await ChatServiceClient.LogInAsync(new SimpleChatApp.GrpcService.AuthorizationData()
                 {
                     ClearActiveConnection = true,
                     UserData = new SimpleChatApp.GrpcService.UserData()
@@ -120,23 +120,23 @@ namespace MobileClient
                 switch (ans.Status)
                 {
                     case SimpleChatApp.GrpcService.AuthorizationStatus.AuthorizationSuccessfull:
-                        alertText = "Authorization successfull!";
-                        break;
+                    alertText = "Authorization successfull!";
+                    break;
 
                     case SimpleChatApp.GrpcService.AuthorizationStatus.WrongLoginOrPassword:
-                        alertText = "Wrong login or password!";
-                        break;
+                    alertText = "Wrong login or password!";
+                    break;
 
                     case SimpleChatApp.GrpcService.AuthorizationStatus.AnotherConnectionActive:
-                        alertText = "Another connection active!";
-                        break;
+                    alertText = "Another connection active!";
+                    break;
 
                     case SimpleChatApp.GrpcService.AuthorizationStatus.AuthorizationError:
-                        alertText = "Server error!";
-                        break;
+                    alertText = "Server error!";
+                    break;
 
                     default:
-                        throw new NotImplementedException();
+                    throw new NotImplementedException();
                 }
                 await DisplayAlert("Alert", alertText, "OK");
 

@@ -65,8 +65,8 @@ namespace MobileClient
         public RegistrationPage()
         {
             InitializeComponent();
-            Entry[] entryes = new[] { LoginEntry, PasswordEntry, ServerIpEntry, ServerPortEntry };
-            foreach (Entry entry in entryes)
+            var entryes = new[] { LoginEntry, PasswordEntry, ServerIpEntry, ServerPortEntry };
+            foreach (var entry in entryes)
             {
                 entry.BindingContext = this;
             }
@@ -90,8 +90,8 @@ namespace MobileClient
 
         private async void RegisterButtonClicked(object sender, EventArgs e)
         {
-            Entry[] entries = new[] { LoginEntry, PasswordEntry, ServerIpEntry, ServerPortEntry };
-            foreach (Entry entry in entries)
+            var entries = new[] { LoginEntry, PasswordEntry, ServerIpEntry, ServerPortEntry };
+            foreach (var entry in entries)
             {
                 if (string.IsNullOrEmpty(entry.Text))
                 {
@@ -107,7 +107,7 @@ namespace MobileClient
             try
             {
                 ChatServiceClient = new ChatServiceClient(new Channel($"{Ip}:{Port}", ChannelCredentials.Insecure));
-                SimpleChatApp.GrpcService.RegistrationAnswer ans = await ChatServiceClient.RegisterNewUserAsync(new SimpleChatApp.GrpcService.UserData()
+                var ans = await ChatServiceClient.RegisterNewUserAsync(new SimpleChatApp.GrpcService.UserData()
                 {
                     Login = Login,
                     PasswordHash = SHA256.GetStringHash(Password)
@@ -116,23 +116,23 @@ namespace MobileClient
                 switch (ans.Status)
                 {
                     case SimpleChatApp.GrpcService.RegistrationStatus.RegistrationSuccessfull:
-                        alertText = "Registration successfull!";
-                        break;
+                    alertText = "Registration successfull!";
+                    break;
 
                     case SimpleChatApp.GrpcService.RegistrationStatus.LoginAlreadyExist:
-                        alertText = "Login already exist!";
-                        break;
+                    alertText = "Login already exist!";
+                    break;
 
                     case SimpleChatApp.GrpcService.RegistrationStatus.BadInput:
-                        alertText = "Bad login or password!";
-                        break;
+                    alertText = "Bad login or password!";
+                    break;
 
                     case SimpleChatApp.GrpcService.RegistrationStatus.RegistratioError:
-                        alertText = "Server error!";
-                        break;
+                    alertText = "Server error!";
+                    break;
 
                     default:
-                        throw new NotImplementedException();
+                    throw new NotImplementedException();
                 }
                 await DisplayAlert("Alert", alertText, "OK");
 

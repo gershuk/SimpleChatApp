@@ -6,7 +6,7 @@
         <Frame CornerRadius="10" BackgroundColor="#F0F9FF" Margin="5">
             <StackLayout Orientation="Vertical">
                 <Label x:Name="UsernameLabel" Text="Name" FontAttributes="Bold" FontSize="16" />
-                <Label x:Name="MessageTextLabel" Text="Text" FontSize="18" TextColor="#000000"/>
+                <Label x:Name="MessageTextLabel" Text="Text" FontSize="18" TextColor="#000000" />
                 <Label x:Name="MessageTimeStampLabel"
                        Text="Time" FontAttributes="Italic"
                        TextColor="Gray"

@@ -12,14 +12,14 @@ public static class ConsoleServer
     {
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
         Console.WriteLine("Enter ip");
-        string? ip = Console.ReadLine();
+        var ip = Console.ReadLine();
         if (ip == null || ip == string.Empty)
         {
             ip = "localhost";
             Console.WriteLine(ip);
         }
         Console.WriteLine("Enter port");
-        string? port = Console.ReadLine();
+        var port = Console.ReadLine();
         if (port == null || port == string.Empty)
         {
             port = "30051";

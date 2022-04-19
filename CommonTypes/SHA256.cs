@@ -7,10 +7,7 @@ namespace SimpleChatApp.CommonTypes
     {
         private static readonly System.Security.Cryptography.SHA256 _mySHA256 = System.Security.Cryptography.SHA256.Create();
 
-        private static Stream GenerateStreamFromString(string str)
-        {
-            return new MemoryStream(Encoding.Unicode.GetBytes(str));
-        }
+        private static Stream GenerateStreamFromString(string str) => new MemoryStream(Encoding.Unicode.GetBytes(str));
 
         public static string GetStringHash(string password)
         {

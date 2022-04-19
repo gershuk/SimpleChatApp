@@ -33,10 +33,7 @@ namespace MobileClient
             set => SetValue(TimeStampProperty, value);
         }
 
-        public MessageVeiw()
-        {
-            InitializeComponent();
-        }
+        public MessageVeiw() => InitializeComponent();
 
         protected override void OnBindingContextChanged()
         {
