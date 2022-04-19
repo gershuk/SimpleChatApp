@@ -3,15 +3,15 @@
           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
           x:Class="MobileClient.MessageVeiw">
     <ViewCell.View>
-        <Frame CornerRadius="10" BackgroundColor="LightBlue" Margin="5">
+        <Frame CornerRadius="10" BackgroundColor="#F0F9FF" Margin="5">
             <StackLayout Orientation="Vertical">
-                <Label x:Name="UsernameLabel" Text="Name" FontAttributes="Bold" TextColor="#FFDE46" FontSize="10" />
-                <Label x:Name="MessageTextLabel" Text="Text" FontSize="14" />
+                <Label x:Name="UsernameLabel" Text="Name" FontAttributes="Bold" FontSize="16" />
+                <Label x:Name="MessageTextLabel" Text="Text" FontSize="18" TextColor="#000000"/>
                 <Label x:Name="MessageTimeStampLabel"
                        Text="Time" FontAttributes="Italic"
                        TextColor="Gray"
                        HorizontalTextAlignment="End"
-                       FontSize="8" />
+                       FontSize="10" />
             </StackLayout>
         </Frame>
     </ViewCell.View>

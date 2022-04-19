@@ -45,6 +45,10 @@ namespace MobileClient
             if (BindingContext != null)
             {
                 UsernameLabel.Text = Username;
+                unchecked
+                {
+                    UsernameLabel.TextColor = Color.FromUint(((uint)Username.GetHashCode()) | 0xFF000000);
+                }
                 MessageTextLabel.Text = Text;
                 MessageTimeStampLabel.Text = TimeStamp;
             }

@@ -212,7 +212,7 @@ namespace MobileClient
                     return;
                 }
 
-                string text = MessageTextEditor.Text;
+                string text = MessageTextEditor.Text.Replace("\r","\r\n");
                 MessageTextEditor.Text = string.Empty;
                 SimpleChatApp.GrpcService.ActionStatusMessage ans = await ChatServiceClient.WriteAsync(new SimpleChatApp.GrpcService.OutgoingMessage()
                 {
@@ -246,13 +246,6 @@ namespace MobileClient
                 await DisplayAlert("Error", $"Status: {ex.Status.StatusCode}{Environment.NewLine}Detail: {ex.Status.Detail}", "OK");
                 await Navigation.PopAsync();
             }
-        }
-
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
-            if (Messages.Count > 0)
-                MessagesList.ScrollTo(Messages[Messages.Count - 1], ScrollToPosition.End, true);
         }
     }
 }
