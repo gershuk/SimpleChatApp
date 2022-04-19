@@ -112,7 +112,9 @@ public static class ConsoleClient
                                                  ChannelCredentials.Insecure));
     }
 
-    private static async Task SubscribeServer(GrpcService.Guid sid, ChatServiceClient chatServiceClient, CancellationToken cancellationToken)
+    private static async Task SubscribeServer(GrpcService.Guid sid,
+                                              ChatServiceClient chatServiceClient,
+                                              CancellationToken cancellationToken)
     {
         var subAns = chatServiceClient.Subscribe(sid).ResponseStream;
         while (await subAns.MoveNext(cancellationToken))

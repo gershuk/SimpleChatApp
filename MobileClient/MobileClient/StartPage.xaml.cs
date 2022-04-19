@@ -10,7 +10,7 @@ namespace MobileClient
     {
         public string Log { get; set; } = "ddddd";
 
-        public StartPage() => InitializeComponent();//L.SetBinding(Entry.TextProperty, "Log"); // "Name" is the property on the view model
+        public StartPage() => InitializeComponent();
 
         private async void ToLoginPageButtonClicked(object sender, EventArgs e) => await Navigation.PushAsync(new LoginPage());
 

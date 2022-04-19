@@ -34,9 +34,14 @@ public class GrpcChatService : ChatService.ChatServiceBase
         }
     }
 
-    public override async Task<GrpcService.AuthorizationAnswer> LogIn(AuthorizationData request, ServerCallContext context) => (await _chatServerModel.LogIn(request.UserData.Login, request.UserData.PasswordHash, context.Peer, request.ClearActiveConnection)).Convert();
+    public override async Task<GrpcService.AuthorizationAnswer> LogIn(AuthorizationData request, ServerCallContext context) => 
+        (await _chatServerModel.LogIn(request.UserData.Login, request.UserData.PasswordHash, context.Peer, request.ClearActiveConnection))
+        .Convert();
 
-    public override async Task<RegistrationAnswer> RegisterNewUser(UserData request, ServerCallContext context) => new() { Status = (await _chatServerModel.RegisterNewUser(request.Login, request.PasswordHash)).Convert() };
+    public override async Task<RegistrationAnswer> RegisterNewUser(UserData request, ServerCallContext context) => new() 
+    { 
+        Status = (await _chatServerModel.RegisterNewUser(request.Login, request.PasswordHash)).Convert() 
+    };
 
     public override async Task Subscribe(GrpcService.Guid request, IServerStreamWriter<Messages> responseStream, ServerCallContext context)
     {

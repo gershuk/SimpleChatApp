@@ -7,14 +7,15 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
     private const string _serverDataBaseConnectionString = "Data Source=server.db";
     private const string _playerConnectionsDataBaseConnectionString = "Data Source=:memory:";
 
-    private const string _accountsTableCreateText = @"CREATE TABLE IF NOT EXISTS ""Accounts"" (""Id"" INTEGER NOT NULL UNIQUE, ""Username""  TEXT NOT NULL UNIQUE,
-""PasswordHash"" TEXT NOT NULL, PRIMARY KEY(""Id""));";
+    private const string _accountsTableCreateText = @"CREATE TABLE IF NOT EXISTS ""Accounts"" (""Id"" INTEGER NOT NULL UNIQUE, 
+""Username""  TEXT NOT NULL UNIQUE, ""PasswordHash"" TEXT NOT NULL, PRIMARY KEY(""Id""));";
 
-    private const string _messagesTableCreateText = @"CREATE TABLE IF NOT EXISTS ""Messages"" (""Id"" TEXT NOT NULL UNIQUE, ""UserId"" INTEGER NOT NULL,
-""Text"" TEXT NOT NULL, ""Timestamp"" DATETIME NOT NULL, PRIMARY KEY(""Id""), FOREIGN KEY(""UserId"") REFERENCES Accounts(""Id""));";
+    private const string _messagesTableCreateText = @"CREATE TABLE IF NOT EXISTS ""Messages"" (""Id"" TEXT NOT NULL UNIQUE, 
+""UserId"" INTEGER NOT NULL, ""Text"" TEXT NOT NULL, ""Timestamp"" DATETIME NOT NULL, PRIMARY KEY(""Id""), 
+FOREIGN KEY(""UserId"") REFERENCES Accounts(""Id""));";
 
-    private const string _connectionsTableCreateText = @"CREATE TABLE IF NOT EXISTS ""Connections"" (""UserId"" INTEGER NOT NULL UNIQUE, ""Sid""  TEXT NOT NULL UNIQUE,
-""PeerData"" TEXT NOT NULL, PRIMARY KEY(""UserId""));";
+    private const string _connectionsTableCreateText = @"CREATE TABLE IF NOT EXISTS ""Connections"" (""UserId"" INTEGER NOT NULL UNIQUE, 
+""Sid""  TEXT NOT NULL UNIQUE,""PeerData"" TEXT NOT NULL, PRIMARY KEY(""UserId""));";
 
     private readonly SqliteConnection _serverDataBaseConnection;
     private readonly SqliteConnection _playerConnectionsDataBaseConnection;
@@ -172,7 +173,8 @@ public sealed class ChatServerModel : IDisposable, IChatServerModel
     private async Task<AccountData?> GetAccountData(string username, string passwordHash)
     {
         username = username.ToUpper();
-        using SqliteCommand getLoginsCommand = new($@"SELECT Id,Username,PasswordHash FROM Accounts WHERE Username = ""{username}"" AND PasswordHash = ""{passwordHash}""",
+        using SqliteCommand getLoginsCommand = new($@"SELECT Id,Username,PasswordHash FROM Accounts 
+WHERE Username = ""{username}"" AND PasswordHash = ""{passwordHash}""",
                                                    _serverDataBaseConnection);
 
         AccountData? accountData = null;
