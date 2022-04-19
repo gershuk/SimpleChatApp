@@ -6,6 +6,12 @@
     <Description>SimpleChatApp common types for project</Description>
     <RepositoryUrl>https://github.com/gershuk/SimpleChatApp</RepositoryUrl>
     <PackageId>SimpleChatApp.CommonTypes</PackageId>
+    <Authors>Blitz</Authors>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/gershuk/SimpleChatApp</PackageProjectUrl>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <FileVersion>1.0.0.1</FileVersion>
+    <Version>$(AssemblyVersion)</Version>
   </PropertyGroup>
 
   <ItemGroup>
