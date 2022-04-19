@@ -9,8 +9,8 @@
     <Authors>Blitz</Authors>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/gershuk/SimpleChatApp</PackageProjectUrl>
-    <AssemblyVersion>1.0.0.2</AssemblyVersion>
-    <FileVersion>1.0.0.2</FileVersion>
+    <AssemblyVersion>1.0.0.3</AssemblyVersion>
+    <FileVersion>1.0.0.3</FileVersion>
     <Version>$(AssemblyVersion)</Version>
   </PropertyGroup>
 
